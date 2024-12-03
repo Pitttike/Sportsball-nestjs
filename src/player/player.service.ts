@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePlayerDto } from './dto/create-player.dto';
 import { UpdatePlayerDto } from './dto/update-player.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -27,17 +27,25 @@ export class PlayerService {
     const player = await this.prisma.player.findUnique({
       where: { id },
     });
+    if (!player) {
+      throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
+    }
     return {
       ...player,
       birthDate: player.birthDate.toISOString().split('T')[0],
     };
   }
 
-  update(id: number, updatePlayerDto: UpdatePlayerDto) {
-    return this.prisma.player.update({
-      where: { id },
-      data: updatePlayerDto,
+  async update(id: number, updatePlayerDto: UpdatePlayerDto) {
+    try {
+      const updatedPlayer = await this.prisma.player.update({
+        where: { id },
+        data: updatePlayerDto,
     });
+      return updatedPlayer;
+    } catch (error) {
+      throw new HttpException('Player not found', HttpStatus.NOT_FOUND);
+    }
   }
 
   remove(id: number) {

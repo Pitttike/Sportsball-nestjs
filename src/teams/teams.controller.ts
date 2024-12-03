@@ -1,11 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
 import { TeamsService } from './teams.service';
 import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
 
 @Controller('teams')
 export class TeamsController {
-  constructor(private readonly teamsService: TeamsService) {}
+  constructor(private readonly teamsService: TeamsService) { }
 
   @Post()
   create(@Body() createTeamDto: CreateTeamDto) {
@@ -22,23 +21,29 @@ export class TeamsController {
     return this.teamsService.findAll();
   }
 
-  @Get('players')
-  findPlayers() {
-    return this.teamsService.findPlayers();
-  }
-
-  @Get(':id')
+  @Get(':id(\\d+)')
   findOne(@Param('id') id: string) {
     return this.teamsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
-    return this.teamsService.update(+id, updateTeamDto);
+  @Get(':id/players')
+  findPlayersOfTeam(@Param('id') id: string) {
+    return this.teamsService.findPlayersOfTeam(+id);
   }
 
-  @Delete(':id')
+  @Get('players')
+  findPlayers() {
+    return this.teamsService.findPlayers();
+  }
+  
+  @Delete(':id(\\d+)')
   remove(@Param('id') id: string) {
     return this.teamsService.remove(+id);
   }
+
+  @Delete(':id/removePlayer/:playerId')
+  removePlayer(@Param('id') id: string, @Param('playerId') playerId: string) {
+    return this.teamsService.removePlayer(+id, +playerId);
+  }
+  
 }

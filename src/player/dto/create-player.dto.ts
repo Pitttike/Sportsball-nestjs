@@ -1,5 +1,12 @@
+import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+
 export class CreatePlayerDto {
-    name: string;
-    goalCount: number;
-    birthDate: Date;
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+  @IsNumber()
+  @IsNotEmpty()
+  goalCount: number;
+  @IsNotEmpty()
+  birthDate: Date;
 }

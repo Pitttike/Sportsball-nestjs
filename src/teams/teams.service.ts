@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
 import { PrismaService } from 'src/prisma.service';
 @Injectable()
 export class TeamsService {
@@ -37,24 +36,36 @@ export class TeamsService {
     return teams;
   }
 
-  findOne(id: number) {
-    return this.prisma.team.findUnique({
+  async findPlayersOfTeam(id: number) {
+    const team = await this.prisma.team.findUnique({
       where: { id },
-    });
-  }
-
-  update(id: number, updateTeamDto: UpdateTeamDto) {
-    return this.prisma.team.update({
-      where: { id },
-      data: {
-        ...updateTeamDto,
+      select: {
+        players: true,
       },
     });
+    return team?.players;
+  }
+
+  async findOne(id: number) {
+    const team = await this.prisma.team.findUnique({
+      where: { id },
+    });
+    if (!team) {
+      throw new HttpException('Team not found', HttpStatus.NOT_FOUND);
+    }
+    return team;
   }
 
   remove(id: number) {
     return this.prisma.team.delete({
       where: { id },
+    });
+  }
+
+  removePlayer(id: number, playerId: number) {
+    return this.prisma.team.update({
+      where: { id },
+      data: { players: { disconnect: { id: playerId } } },
     });
   }
 }
